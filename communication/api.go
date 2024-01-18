@@ -96,12 +96,13 @@ func (conn *Conn) send(data []byte) error {
 
 // Test 发送一个测试连接的 UDP 包
 func (conn *Conn) Test() error {
-	return conn.send(conn.ins.TestInstruction())
+
+	return conn.send(conn.ins.TestInstruction().Instruction())
 }
 
 // Last 发送上一条命令
 func (conn *Conn) Last() error {
-	return conn.send(conn.ins.LastInstruction())
+	return conn.send(conn.ins.Instruction())
 }
 
 // Read 从连接中读取数据
@@ -129,5 +130,5 @@ func (conn *Conn) Read() error {
 
 // Close 关闭 UDP 连接
 func (conn *Conn) Close() {
-	conn.udpConn.Close()
+	_ = conn.udpConn.Close()
 }
