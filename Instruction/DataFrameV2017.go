@@ -18,7 +18,7 @@ type InstructionV2017 struct {
 	instruction []byte
 }
 
-func InitinstructionV2017(mac net.HardwareAddr) Instruction {
+func InitInstructionV2017(mac net.HardwareAddr) Instruction {
 	res := &InstructionV2017{
 		instruction: make([]byte, 36),
 	}

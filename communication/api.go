@@ -79,7 +79,7 @@ func NewConn(eth string, version string) (*Conn, error) {
 	conn.remoteAddr = remoteAddr
 	switch version {
 	case "V20170721":
-		conn.ins = Instruction.InitinstructionV2017(iface.HardwareAddr)
+		conn.ins = Instruction.InitInstructionV2017(iface.HardwareAddr)
 	default:
 		conn.ins = nil
 	}
