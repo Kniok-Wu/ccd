@@ -1,7 +1,7 @@
 /**
  * @Time: 2024/1/15 16:57
  * @Author: kniokwu@gmail.com
- * @File: api.go
+ * @File: conn.go
  * @Software: GoLand CCDSoftware
  * @Description: $
  */
@@ -9,10 +9,11 @@
 package communication
 
 import (
-	"CCDSoftware/Instruction"
+	"CCDSoftware/instruction"
+	"CCDSoftware/response"
 	"fmt"
 	"net"
-	"time"
+	"os/exec"
 )
 
 // UDPPort 上位机和CCD固定端口号
@@ -25,12 +26,12 @@ var RemoteIP string = "192.168.0.2"
 type Conn struct {
 	localAddr  *net.UDPAddr
 	remoteAddr *net.UDPAddr
-	ins        Instruction.Instruction
+	ins        instruction.Instruction
 	udpConn    *net.UDPConn
 }
 
-// NewConn 新建一个UDP服务
-func NewConn(eth string, version string) (*Conn, error) {
+// InitConn 新建一个UDP服务
+func InitConn(eth string, version string, mac string) (*Conn, error) {
 	conn := &Conn{
 		localAddr:  nil,
 		remoteAddr: nil,
@@ -66,7 +67,17 @@ func NewConn(eth string, version string) (*Conn, error) {
 	// 4. 生成本地 UDP 地址
 	localAddr, _ := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", localIp.IP, UDPPort))
 
-	// 5. 建立 UDP 连接
+	// 5. 如果存在 MAC 地址 则手动写入arp缓存
+	if mac != "" {
+		cmd := exec.Command(fmt.Sprintf("arp -s %s %s", remoteAddr.IP, mac))
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+			return nil, ErrorManuallyUpdateARPCache{Message: "请检查MAC地址是否符合要求。"}
+		}
+	}
+
+	// 6. 建立 UDP 连接
 	var udpConn *net.UDPConn
 
 	udpConn, err = net.DialUDP("udp", localAddr, remoteAddr)
@@ -79,7 +90,7 @@ func NewConn(eth string, version string) (*Conn, error) {
 	conn.remoteAddr = remoteAddr
 	switch version {
 	case "V20170721":
-		conn.ins = Instruction.InitInstructionV2017(iface.HardwareAddr)
+		conn.ins = instruction.InitInstructionV2017(iface.HardwareAddr)
 	default:
 		conn.ins = nil
 	}
@@ -96,8 +107,8 @@ func (conn *Conn) send(data []byte) error {
 
 // Test 发送一个测试连接的 UDP 包
 func (conn *Conn) Test() error {
-
-	return conn.send(conn.ins.TestInstruction().Instruction())
+	conn.ins.TestInstruction().DisplayInstruction()
+	return conn.send(conn.ins.Instruction())
 }
 
 // Last 发送上一条命令
@@ -110,21 +121,13 @@ func (conn *Conn) Read() error {
 	var err error = nil
 	data := make([]byte, 1024)
 	for {
-		err = conn.udpConn.SetReadDeadline(time.Now().Add(time.Second))
+		_, _, err = conn.udpConn.ReadFromUDP(data)
 		if err != nil {
 			return err
 		}
-		_, _, err = conn.udpConn.ReadFromUDP(data)
-		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-			err = conn.Last()
-			if err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
-
-		fmt.Println(data)
+		res := response.ParseV2017(data)
+		fmt.Println(res)
+		return nil
 	}
 }
 

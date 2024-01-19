@@ -6,7 +6,7 @@
  * @Description: $
  */
 
-package Instruction
+package instruction
 
 import (
 	"encoding/binary"
@@ -53,12 +53,12 @@ func (ins *InstructionV2017) TestInstruction() Instruction {
 	ins.SwitchInstruction(0)
 	// 积分电容值
 	ins.CapacitanceInstruction()
-	// 采样时钟
-	ins.ExposurePeriodInstruction(4000)
 	// 分频比
-	ins.DividerRatioInstruction(6)
+	ins.DividerRatioInstruction(12)
 	// 占空周期
-	ins.EmptyRateInstruction(4000)
+	ins.EmptyRateInstruction(741)
+	// 曝光周期
+	ins.ExposurePeriodInstruction(741)
 
 	return ins
 }
@@ -104,8 +104,4 @@ func (ins *InstructionV2017) DisplayInstruction() {
 		fmt.Printf("%02x ", ins.instruction[i])
 	}
 	fmt.Println()
-}
-
-// UploadFrame 数据返回帧
-type UploadFrame struct {
 }

@@ -52,3 +52,12 @@ type ErrorInterfaceSettings struct {
 func (err ErrorInterfaceSettings) Error() string {
 	return err.Message
 }
+
+// ErrorManuallyUpdateARPCache 无法手动写入 ARP 缓存
+type ErrorManuallyUpdateARPCache struct {
+	Message string
+}
+
+func (err ErrorManuallyUpdateARPCache) Error() string {
+	return err.Message
+}

@@ -6,7 +6,7 @@
  * @Description: $
  */
 
-package Instruction
+package instruction
 
 type Instruction interface {
 	// Instruction 返回该指令中包含的二进制数组

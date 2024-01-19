@@ -15,7 +15,7 @@ import (
 )
 
 func TestDataframe(t *testing.T) {
-	conn, err := NewConn("en8")
+	conn, err := InitConn("en8")
 	if err != nil {
 		fmt.Println(err)
 		return

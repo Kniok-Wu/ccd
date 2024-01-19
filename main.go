@@ -11,10 +11,18 @@ package main
 import (
 	"CCDSoftware/communication"
 	"fmt"
+	"net"
+	"time"
 )
 
 func main() {
-	conn, err := communication.NewConn("en8", "V20170721")
+	ifaces, _ := net.Interfaces()
+	for _, iface := range ifaces {
+		addr, _ := iface.Addrs()
+		fmt.Println(iface.Name, addr)
+	}
+
+	conn, err := communication.InitConn("en8", "V20170721", "")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -22,10 +30,18 @@ func main() {
 	defer conn.Close()
 
 	err = conn.Test()
+	time.Sleep(time.Second)
+	err = conn.Test()
+	time.Sleep(time.Second)
+	err = conn.Test()
+	time.Sleep(time.Second)
+	err = conn.Test()
+	time.Sleep(time.Second)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("测试指令发送成功。")
 
 	err = conn.Read()
 	if err != nil {
